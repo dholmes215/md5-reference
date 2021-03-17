@@ -1,6 +1,6 @@
 # cpp-template
 
-![Build](https://github.com/dholmes215/cpp-template/actions/workflows/cmake.yml/badge.svg)
+![Windows](https://github.com/dholmes215/cpp-template/actions/workflows/cmake-msvc.yml/badge.svg) ![Ubuntu](https://github.com/dholmes215/cpp-template/actions/workflows/cmake-ubuntu.yml/badge.svg)
 
 Template for David's C++ projects.
 
