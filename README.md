@@ -1,6 +1,6 @@
 # cpp-template
 
-![Build](https://github.com/dholmes215/cpp-template/actions/workflows/build.yml/badge.svg)
+![Build](https://github.com/dholmes215/cpp-template/actions/workflows/build.yml/badge.svg) ![clang-format](https://github.com/dholmes215/cpp-template/actions/workflows/clang-format.yml/badge.svg)
 
 Template for David's C++ projects.
 
