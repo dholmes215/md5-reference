@@ -1,20 +1,7 @@
-# RSA MD5 Reference Implementation
+/* MD5.H - header file for MD5C.C
+ */
 
-![Build](https://github.com/dholmes215/md5-reference/actions/workflows/build.yml/badge.svg) ![clang-format](https://github.com/dholmes215/md5-reference/actions/workflows/clang-format.yml/badge.svg)
-
-This is the reference implementation in C of the MD5 algorithm as it appears in the appendices of [RFC 1321 ("The MD5 Message-Digest Algorithm)"](https://datatracker.ietf.org/doc/html/rfc1321).  The RFC includes four files:
-
-- `global.h` -- global header file
-- `md5.h` -- header file for MD5
-- `md5.c` -- source code for MD5
-- `mddriver.c` -- test driver for MD2, MD4 and MD5
-
-## License
-
-The copyright notice and license from md5.h is:
-
-```text
-Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All
+/* Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All
 rights reserved.
 
 License to copy and use this software is granted provided that it
@@ -34,4 +21,16 @@ without express or implied warranty of any kind.
 
 These notices must be retained in any copies of any part of this
 documentation and/or software.
-```
+ */
+
+/* MD5 context. */
+typedef struct {
+  UINT4 state[4];                                   /* state (ABCD) */
+  UINT4 count[2];        /* number of bits, modulo 2^64 (lsb first) */
+  unsigned char buffer[64];                         /* input buffer */
+} MD5_CTX;
+
+void MD5Init PROTO_LIST ((MD5_CTX *));
+void MD5Update PROTO_LIST
+  ((MD5_CTX *, unsigned char *, unsigned int));
+void MD5Final PROTO_LIST ((unsigned char [16], MD5_CTX *));
