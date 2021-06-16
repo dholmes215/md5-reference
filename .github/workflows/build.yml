@@ -8,10 +8,10 @@ jobs:
     strategy:
       matrix:
         platform:
-        - { Name: Windows VS2019, os: windows-2019, cc: cl.exe, cxx: cl.exe }
-        - { Name: Linux GCC,      os: ubuntu-20.04, cc: gcc,    cxx: g++ }
-        - { Name: Linux Clang,    os: ubuntu-20.04, cc: clang,  cxx: clang++ }
-        - { Name: MacOS Clang,    os: macos-10.15,  cc: clang,  cxx: clang++ }
+        - { Name: Windows VS2019, os: windows-2019, cc: cl.exe,    cxx: cl.exe }
+        - { Name: Linux GCC,      os: ubuntu-20.04, cc: gcc-10,    cxx: g++-10 }
+        - { Name: Linux Clang,    os: ubuntu-20.04, cc: clang-12,  cxx: clang++-12 }
+        - { Name: MacOS Clang,    os: macos-10.15,  cc: clang,     cxx: clang++ }
         build_type: [Release, Debug]
 
     env:
