@@ -29,10 +29,6 @@ jobs:
       if: runner.os == 'Windows'
       run: vswhere -all -prerelease
 
-    - name: Log g++/clang++ version
-      if: matrix.platform.cxx == 'g++' || matrix.platform.cxx == 'clang++'
-      run: $CXX --version
-
     - name: Log CMake version
       run: cmake --version
 
