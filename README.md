@@ -4,6 +4,8 @@
 
 Template for David's C++ projects.
 
+After cloning this project you will need to init/update the `vcpkg` submodule by running: `git submodule update --init --recursive`
+
 To build this project you will need:
 
 * **A C++20 compiler** (one of MSVC, g++, or clang++)
