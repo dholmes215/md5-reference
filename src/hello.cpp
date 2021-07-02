@@ -1,7 +1,7 @@
 // Copyright (C) 2021 David Holmes <dholmes@dholmes.us>. All rights reserved.
-#include <iostream>
+#include <fmt/format.h>
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    fmt::print("Hello {}!\n", "World!");
 }

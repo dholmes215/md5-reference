@@ -1,2 +1,2 @@
 add_executable(hello hello.cpp)
-target_link_libraries(hello PRIVATE project_warnings)
+target_link_libraries(hello PRIVATE project_warnings fmt::fmt)

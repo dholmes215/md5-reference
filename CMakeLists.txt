@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.20.3)
 
+if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+  set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake")
+endif()
+
 project(hello LANGUAGES CXX)
+
+find_package(fmt REQUIRED)
 
 # Link this 'library' to use the warnings specified in CompilerWarnings.cmake
 add_library(project_warnings INTERFACE)
