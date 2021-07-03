@@ -1,6 +1,6 @@
 # RSA MD5 Reference Implementation
 
-![Build](https://github.com/dholmes215/md5-reference/actions/workflows/build.yml/badge.svg) ![clang-format](https://github.com/dholmes215/md5-reference/actions/workflows/clang-format.yml/badge.svg)
+![Build](../../actions/workflows/build.yml/badge.svg) ![clang-format](../../actions/workflows/clang-format.yml/badge.svg)
 
 This is the reference implementation in C of the MD5 algorithm as it appears in the appendices of [RFC 1321 ("The MD5 Message-Digest Algorithm)"](https://datatracker.ietf.org/doc/html/rfc1321).  The RFC includes four files:
 
@@ -35,3 +35,12 @@ without express or implied warranty of any kind.
 These notices must be retained in any copies of any part of this
 documentation and/or software.
 ```
+
+After cloning this project you will need to init/update the `vcpkg` submodule by running: `git submodule update --init --recursive`
+
+To build this project you will need:
+
+- **A C11 & C++20 compiler** (one of MSVC, g++, or clang++)
+- **CMake 3.20.3 or later**.  "Modern CMake" has recommendations on where to get CMake here: <https://cliutils.gitlab.io/modern-cmake/chapters/intro/installing.html>
+- **clang-format** and an editor that supports it.  You don't strictly _need_ this, but the GitHub Actions will bark at you if you push code that doesn't match .clang_format.
+- On Linux `vcpkg`'s bootstrap process will want several tools installed: `sudo apt-get install curl zip unzip tar`

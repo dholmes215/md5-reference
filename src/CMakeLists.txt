@@ -1,4 +1,5 @@
 add_library(md5 md5.c md5.h global.h)
+target_include_directories(md5 INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(md5 PRIVATE project_warnings)
 
 add_executable(mddriver mddriver.c global.h md5)
