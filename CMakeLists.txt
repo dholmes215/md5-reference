@@ -12,6 +12,7 @@ configure_vcpkg("${CMAKE_CURRENT_LIST_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmak
 # Configure project (requires vcpkg)
 project(hello LANGUAGES CXX)
 
+find_package(Catch2 REQUIRED)
 find_package(fmt REQUIRED)
 
 # Link this 'library' to use the warnings specified in CompilerWarnings.cmake
@@ -26,3 +27,4 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_subdirectory(src)
+add_subdirectory(tests)
