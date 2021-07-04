@@ -39,12 +39,12 @@ documentation and/or software.
 #define TEST_BLOCK_LEN 1000
 #define TEST_BLOCK_COUNT 1000
 
-static void MDString PROTO_LIST ((char *));
-static void MDTimeTrial PROTO_LIST ((void));
-static void MDTestSuite PROTO_LIST ((void));
-static void MDFile PROTO_LIST ((char *));
-static void MDFilter PROTO_LIST ((void));
-static void MDPrint PROTO_LIST ((unsigned char [16]));
+static void MDString(char *);
+static void MDTimeTrial(void);
+static void MDTestSuite(void);
+static void MDFile(char *);
+static void MDFilter(void);
+static void MDPrint(unsigned char [16]);
 
 #if MD == 2
 #define MD_CTX MD2_CTX
@@ -106,7 +106,7 @@ char *string;
   unsigned int len = (unsigned int)strlen (string);
 
   MDInit (&context);
-  MDUpdate (&context, string, len);
+  MDUpdate (&context, (unsigned char *)string, len);
   MDFinal (digest, &context);
 
   printf ("MD%d (\"%s\") = ", MD, string);
@@ -177,7 +177,7 @@ char *filename;
 {
   FILE *file;
   MD_CTX context;
-  int len;
+  unsigned int len;
   unsigned char buffer[1024], digest[16];
 
   if ((file = fopen (filename, "rb")) == NULL)
@@ -185,7 +185,7 @@ char *filename;
 
   else {
  MDInit (&context);
- while ((len = (int)fread (buffer, 1, 1024, file)))
+ while ((len = (unsigned int)fread (buffer, 1, 1024, file)))
    MDUpdate (&context, buffer, len);
  MDFinal (digest, &context);
 
@@ -202,11 +202,11 @@ char *filename;
 static void MDFilter ()
 {
   MD_CTX context;
-  int len;
+  unsigned int len;
   unsigned char buffer[16], digest[16];
 
   MDInit (&context);
-  while ((len = (int)fread (buffer, 1, 16, stdin)))
+  while ((len = (unsigned int)fread (buffer, 1, 16, stdin)))
  MDUpdate (&context, buffer, len);
   MDFinal (digest, &context);
 

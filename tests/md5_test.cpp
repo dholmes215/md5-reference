@@ -1,7 +1,3 @@
-// "global.h" requires this to be set, otherwise the library will omit parameter
-// lists from function declarations, which is not compatible with C++.
-#define PROTOTYPES 1
-
 // "md5.h" requires "global.h" to be previously included but does not include
 // it, and both files don't have include guards.  clang-format has to be off so
 // it doesn't reorder them.
