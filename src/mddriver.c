@@ -16,7 +16,6 @@ documentation and/or software.
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
-#include "global.h"
 #include "md5.h"
 
 /* Length of test block, number of test blocks.

@@ -1,13 +1,7 @@
-// "md5.h" requires "global.h" to be previously included but does not include
-// it, and both files don't have include guards.  clang-format has to be off so
-// it doesn't reorder them.
 
-// clang-format off
 extern "C" {
-#include "global.h"
 #include "md5.h"
 }
-// clang-format on
 
 #include <catch2/catch.hpp>
 
