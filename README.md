@@ -6,7 +6,7 @@ This is the reference implementation in C of the MD5 algorithm as it appears in 
 
 - `global.h` -- global header file
 - `md5.h` -- header file for MD5
-- `md5.c` -- source code for MD5
+- `md5c.c` -- source code for MD5
 - `mddriver.c` -- test driver for MD2, MD4 and MD5
 
 ## License
@@ -36,11 +36,12 @@ These notices must be retained in any copies of any part of this
 documentation and/or software.
 ```
 
-After cloning this project you will need to init/update the `vcpkg` submodule by running: `git submodule update --init --recursive`
-
 To build this project you will need:
 
-- **A C11 & C++20 compiler** (one of MSVC, g++, or clang++)
+- **A C compiler** (tested with recent MSVC, gcc and clang but should support nearly anything that CMake supports)
 - **CMake 3.20.3 or later**.  "Modern CMake" has recommendations on where to get CMake here: <https://cliutils.gitlab.io/modern-cmake/chapters/intro/installing.html>
-- **clang-format** and an editor that supports it.  You don't strictly _need_ this, but the GitHub Actions will bark at you if you push code that doesn't match .clang_format.
+
+Additionally, to build and run unit tests you will need:
+
+- **A C++20 compiler** (one of MSVC, g++, or clang++)
 - On Linux `vcpkg`'s bootstrap process will want several tools installed: `sudo apt-get install curl zip unzip tar`
