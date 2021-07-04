@@ -2,12 +2,21 @@
 
 ![Build](../../actions/workflows/build.yml/badge.svg) ![clang-format](../../actions/workflows/clang-format.yml/badge.svg)
 
-This is the reference implementation in C of the MD5 algorithm as it appears in the appendices of [RFC 1321 ("The MD5 Message-Digest Algorithm)"](https://datatracker.ietf.org/doc/html/rfc1321).  The RFC includes four files:
+This is a modified version of the reference implementation in C of the MD5 algorithm as it appears in the appendices of [RFC 1321 ("The MD5 Message-Digest Algorithm)"](https://datatracker.ietf.org/doc/html/rfc1321).  The RFC includes four files:
 
 - `global.h` -- global header file
 - `md5.h` -- header file for MD5
 - `md5c.c` -- source code for MD5
 - `mddriver.c` -- test driver for MD2, MD4 and MD5
+
+Modifications include:
+
+- Requiring C99
+- Removal of bad practices required by K&R C and C90
+- Proper header/include practices
+- Minor fixes for 64-bit support
+
+Derived from the RSA Data Security, Inc. MD5 Message-Digest Algorithm.
 
 ## License
 
