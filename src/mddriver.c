@@ -13,26 +13,11 @@ These notices must be retained in any copies of any part of this
 documentation and/or software.
  */
 
-/* The following makes MD default to MD5 if it has not already been
-  defined with C compiler flags.
- */
-#ifndef MD
-#define MD MD5
-#endif
-
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
 #include "global.h"
-#if MD == 2
-#include "md2.h"
-#endif
-#if MD == 4
-#include "md4.h"
-#endif
-#if MD == 5
 #include "md5.h"
-#endif
 
 /* Length of test block, number of test blocks.
  */
@@ -45,25 +30,6 @@ static void MDTestSuite(void);
 static void MDFile(char *);
 static void MDFilter(void);
 static void MDPrint(unsigned char [16]);
-
-#if MD == 2
-#define MD_CTX MD2_CTX
-#define MDInit MD2Init
-#define MDUpdate MD2Update
-#define MDFinal MD2Final
-#endif
-#if MD == 4
-#define MD_CTX MD4_CTX
-#define MDInit MD4Init
-#define MDUpdate MD4Update
-#define MDFinal MD4Final
-#endif
-#if MD == 5
-#define MD_CTX MD5_CTX
-#define MDInit MD5Init
-#define MDUpdate MD5Update
-#define MDFinal MD5Final
-#endif
 
 /* Main driver.
 
@@ -98,13 +64,13 @@ int main (int argc, char** argv)
  */
 static void MDString (char* string)
 {
-  MD_CTX context;
+  MD5_CTX context;
   unsigned char digest[16];
   unsigned int len = (unsigned int)strlen (string);
 
-  MDInit (&context);
-  MDUpdate (&context, (unsigned char *)string, len);
-  MDFinal (digest, &context);
+  MD5Init (&context);
+  MD5Update (&context, (unsigned char *)string, len);
+  MD5Final (digest, &context);
 
   printf ("MD%d (\"%s\") = ", MD, string);
   MDPrint (digest);
@@ -116,7 +82,7 @@ static void MDString (char* string)
  */
 static void MDTimeTrial ()
 {
-  MD_CTX context;
+  MD5_CTX context;
   time_t endTime, startTime;
   unsigned char block[TEST_BLOCK_LEN], digest[16];
   unsigned int i;
@@ -132,10 +98,10 @@ static void MDTimeTrial ()
   time (&startTime);
 
   /* Digest blocks */
-  MDInit (&context);
+  MD5Init (&context);
   for (i = 0; i < TEST_BLOCK_COUNT; i++)
- MDUpdate (&context, block, TEST_BLOCK_LEN);
-  MDFinal (digest, &context);
+ MD5Update (&context, block, TEST_BLOCK_LEN);
+  MD5Final (digest, &context);
 
   /* Stop timer */
   time (&endTime);
@@ -172,7 +138,7 @@ static void MDTestSuite ()
 static void MDFile (char* filename)
 {
   FILE *file;
-  MD_CTX context;
+  MD5_CTX context;
   unsigned int len;
   unsigned char buffer[1024], digest[16];
 
@@ -186,10 +152,10 @@ static void MDFile (char* filename)
  printf ("%s can't be opened\n", filename);
 
   else {
- MDInit (&context);
+ MD5Init (&context);
  while ((len = (unsigned int)fread (buffer, 1, 1024, file)) != 0)
-   MDUpdate (&context, buffer, len);
- MDFinal (digest, &context);
+   MD5Update (&context, buffer, len);
+ MD5Final (digest, &context);
 
  fclose (file);
 
@@ -203,14 +169,14 @@ static void MDFile (char* filename)
  */
 static void MDFilter ()
 {
-  MD_CTX context;
+  MD5_CTX context;
   unsigned int len;
   unsigned char buffer[16], digest[16];
 
-  MDInit (&context);
+  MD5Init (&context);
   while ((len = (unsigned int)fread (buffer, 1, 16, stdin)) != 0)
- MDUpdate (&context, buffer, len);
-  MDFinal (digest, &context);
+ MD5Update (&context, buffer, len);
+  MD5Final (digest, &context);
 
   MDPrint (digest);
   printf ("\n");
