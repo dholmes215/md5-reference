@@ -176,6 +176,12 @@ static void MDFile (char* filename)
   unsigned int len;
   unsigned char buffer[1024], digest[16];
 
+// MSVC doesn't like fopen, but we still support C99 so we're not guaranteed to
+// have fopen_s, so suppress this warning.
+#if (defined(_MSC_VER) && (_MSC_VER >= 1400))
+#pragma warning(disable : 4996)
+#endif
+
   if ((file = fopen (filename, "rb")) == NULL)
  printf ("%s can't be opened\n", filename);
 
