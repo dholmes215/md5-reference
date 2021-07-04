@@ -14,7 +14,9 @@ if(BUILD_TESTING)
 
     project(md5 LANGUAGES C CXX)
 
+    find_package(Boost 1.75.0 REQUIRED)
     find_package(Catch2 REQUIRED)
+    find_package(Microsoft.GSL REQUIRED CONFIG)
 else()
     project(md5 LANGUAGES C)
 endif()
