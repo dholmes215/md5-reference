@@ -26,6 +26,8 @@ documentation and/or software.
 #include "global.h"
 #include "md5.h"
 
+#include "string.h"
+
 /* Constants for MD5Transform routine.
  */
 
@@ -50,8 +52,6 @@ documentation and/or software.
 static void MD5Transform(UINT4 [4], unsigned char [64]);
 static void Encode (unsigned char *, UINT4 *, unsigned int);
 static void Decode(UINT4 *, unsigned char *, unsigned int);
-static void MD5_memcpy(POINTER, POINTER, unsigned int);
-static void MD5_memset(POINTER, int, unsigned int);
 
 static unsigned char PADDING[64] = {
   0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -134,7 +134,7 @@ void MD5Update (MD5_CTX* context, unsigned char* input, unsigned int inputLen)
   /* Transform as many times as possible.
 */
   if (inputLen >= partLen) {
- MD5_memcpy
+ memcpy
    ((POINTER)&context->buffer[index], (POINTER)input, partLen);
  MD5Transform (context->state, context->buffer);
 
@@ -147,7 +147,7 @@ void MD5Update (MD5_CTX* context, unsigned char* input, unsigned int inputLen)
  i = 0;
 
   /* Buffer remaining input */
-  MD5_memcpy
+  memcpy
  ((POINTER)&context->buffer[index], (POINTER)&input[i],
   inputLen-i);
 }
@@ -181,7 +181,7 @@ void MD5Final (unsigned char* digest, MD5_CTX* context)
 
   /* Zeroize sensitive information.
 */
-  MD5_memset ((POINTER)context, 0, sizeof (*context));
+  memset ((POINTER)context, 0, sizeof (*context));
 }
 
 /* MD5 basic transformation. Transforms state based on block.
@@ -276,7 +276,7 @@ static void MD5Transform (UINT4* state, unsigned char* block)
 
   /* Zeroize sensitive information.
 */
-  MD5_memset ((POINTER)x, 0, sizeof (x));
+  memset ((POINTER)x, 0, sizeof (x));
 }
 
 /* Encodes input (UINT4) into output (unsigned char). Assumes len is
@@ -304,25 +304,4 @@ static void Decode (UINT4* output, unsigned char* input, unsigned int len)
   for (i = 0, j = 0; j < len; i++, j += 4)
  output[i] = ((UINT4)input[j]) | (((UINT4)input[j+1]) << 8) |
    (((UINT4)input[j+2]) << 16) | (((UINT4)input[j+3]) << 24);
-}
-
-/* Note: Replace "for loop" with standard memcpy if possible.
- */
-
-static void MD5_memcpy (POINTER output, POINTER input, unsigned int len)
-{
-  unsigned int i;
-
-  for (i = 0; i < len; i++)
- output[i] = input[i];
-}
-
-/* Note: Replace "for loop" with standard memset if possible.
- */
-static void MD5_memset (POINTER output, int value, unsigned int len)
-{
-  unsigned int i;
-
-  for (i = 0; i < len; i++)
- ((char *)output)[i] = (char)value;
 }
