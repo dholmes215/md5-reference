@@ -44,18 +44,18 @@ TEST_CASE("MD5 test strings")
 {
     // clang-format off
     CHECK(MDString("")
-          == from_hex("e4c23762ed2823a27e62a64b95c024e7"));
+          == from_hex("d41d8cd98f00b204e9800998ecf8427e"));
     CHECK(MDString("a")
-          == from_hex("793a9bc07e209b286fa416d6ee29a85d"));
+          == from_hex("0cc175b9c0f1b6a831c399e269772661"));
     CHECK(MDString("abc")
-          == from_hex("7999dc75e8da648c6727e137c5b77803"));
+          == from_hex("900150983cd24fb0d6963f7d28e17f72"));
     CHECK(MDString("message digest")
-          == from_hex("840793371ec58a6cc84896a5153095de"));
+          == from_hex("f96b697d7cb7938d525a2f31aaf161d0"));
     CHECK(MDString("abcdefghijklmnopqrstuvwxyz")
-          == from_hex("98ef94f1f01ac7b91918c6747fdebd96"));
+          == from_hex("c3fcd3d76192e4007dfb496cca67e13b"));
     CHECK(MDString("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
-          == from_hex("dabcd637cde443764c4f8aa099cf23be"));
+          == from_hex("d174ab98d277d9f5a5611c2c9f419d9f"));
     CHECK(MDString("12345678901234567890123456789012345678901234567890123456789012345678901234567890")
-          == from_hex("e29c01a1e2a663c26b4a68bf7ec42df7"));
+          == from_hex("57edf4a22be3c955ac49da2e2107b67a"));
     // clang-format on
 }
