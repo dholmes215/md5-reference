@@ -103,7 +103,7 @@ char *string;
 {
   MD_CTX context;
   unsigned char digest[16];
-  unsigned int len = strlen (string);
+  unsigned int len = (unsigned int)strlen (string);
 
   MDInit (&context);
   MDUpdate (&context, string, len);
@@ -185,7 +185,7 @@ char *filename;
 
   else {
  MDInit (&context);
- while (len = fread (buffer, 1, 1024, file))
+ while ((len = (int)fread (buffer, 1, 1024, file)))
    MDUpdate (&context, buffer, len);
  MDFinal (digest, &context);
 
@@ -206,7 +206,7 @@ static void MDFilter ()
   unsigned char buffer[16], digest[16];
 
   MDInit (&context);
-  while (len = fread (buffer, 1, 16, stdin))
+  while ((len = (int)fread (buffer, 1, 16, stdin)))
  MDUpdate (&context, buffer, len);
   MDFinal (digest, &context);
 

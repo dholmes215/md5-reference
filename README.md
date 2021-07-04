@@ -15,6 +15,7 @@ Modifications include:
 - Removal of bad practices required by K&R C and C90
 - Proper header/include practices
 - Minor fixes for 64-bit support
+- Compiler warning fixes and enforcement
 
 Derived from the RSA Data Security, Inc. MD5 Message-Digest Algorithm.
 

@@ -24,7 +24,7 @@ endif()
 # Link this 'library' to use the warnings specified in CompilerWarnings.cmake
 add_library(project_warnings INTERFACE)
 
-# Configure compiler warnings. The code doesn't actually _pass_ these warnings though.
+# Configure compiler warnings.
 include(cmake/CompilerWarnings.cmake)
 set_project_warnings(project_warnings)
 
