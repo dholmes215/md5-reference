@@ -146,7 +146,7 @@ static void MDTimeTrial ()
   printf ("\nTime = %ld seconds\n", (long)(endTime-startTime));
   printf
  ("Speed = %ld bytes/second\n",
-  ((long)TEST_BLOCK_LEN * (long)TEST_BLOCK_COUNT)/(endTime-startTime));
+  (long)TEST_BLOCK_LEN * ((long)TEST_BLOCK_COUNT/(long)(endTime-startTime)));
 }
 
 /* Digests a reference suite of strings and prints the results.
