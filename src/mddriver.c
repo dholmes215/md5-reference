@@ -187,7 +187,7 @@ static void MDFile (char* filename)
 
   else {
  MDInit (&context);
- while ((len = (unsigned int)fread (buffer, 1, 1024, file)))
+ while ((len = (unsigned int)fread (buffer, 1, 1024, file)) != 0)
    MDUpdate (&context, buffer, len);
  MDFinal (digest, &context);
 
@@ -208,7 +208,7 @@ static void MDFilter ()
   unsigned char buffer[16], digest[16];
 
   MDInit (&context);
-  while ((len = (unsigned int)fread (buffer, 1, 16, stdin)))
+  while ((len = (unsigned int)fread (buffer, 1, 16, stdin)) != 0)
  MDUpdate (&context, buffer, len);
   MDFinal (digest, &context);
 
