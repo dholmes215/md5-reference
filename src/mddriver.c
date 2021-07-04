@@ -71,7 +71,7 @@ static void MDString(char* string)
     MD5Update(&context, (unsigned char*)string, len);
     MD5Final(digest, &context);
 
-    printf("MD%d (\"%s\") = ", MD, string);
+    printf("MD5 (\"%s\") = ", string);
     MDPrint(digest);
     printf("\n");
 }
@@ -85,8 +85,8 @@ static void MDTimeTrial()
     time_t endTime, startTime;
     unsigned char block[TEST_BLOCK_LEN], digest[16];
     unsigned int i;
-    printf("MD%d time trial. Digesting %d %d-byte blocks ...", MD,
-           TEST_BLOCK_LEN, TEST_BLOCK_COUNT);
+    printf("MD5 time trial. Digesting %d %d-byte blocks ...", TEST_BLOCK_LEN,
+           TEST_BLOCK_COUNT);
 
     /* Initialize block */
     for (i = 0; i < TEST_BLOCK_LEN; i++)
@@ -117,7 +117,7 @@ static void MDTimeTrial()
  */
 static void MDTestSuite()
 {
-    printf("MD%d test suite:\n", MD);
+    printf("MD5 test suite:\n");
 
     MDString("");
     MDString("a");
@@ -156,7 +156,7 @@ static void MDFile(char* filename)
 
         fclose(file);
 
-        printf("MD%d (%s) = ", MD, filename);
+        printf("MD5 (%s) = ", filename);
         MDPrint(digest);
         printf("\n");
     }
