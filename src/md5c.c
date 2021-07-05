@@ -59,40 +59,60 @@ static unsigned char PADDING[64] = {
 
 /* F, G, H and I are basic MD5 functions.
  */
-#define F(x, y, z) (((x) & (y)) | ((~x) & (z)))
-#define G(x, y, z) (((x) & (z)) | ((y) & (~z)))
-#define H(x, y, z) ((x) ^ (y) ^ (z))
-#define I(x, y, z) ((y) ^ ((x) | (~z)))
 
-/* ROTATE_LEFT rotates x left n bits.
+static uint32_t f(uint32_t x, uint32_t y, uint32_t z)
+{
+    return (x & y) | (~x & z);
+}
+
+static uint32_t g(uint32_t x, uint32_t y, uint32_t z)
+{
+    return (x & z) | (y & ~z);
+}
+
+static uint32_t h(uint32_t x, uint32_t y, uint32_t z)
+{
+    return x ^ y ^ z;
+}
+
+static uint32_t i(uint32_t x, uint32_t y, uint32_t z)
+{
+    return y ^ (x | ~z);
+}
+
+/* Rotate x left n bits.
+    TODO: use C++20's std::rotl
  */
-#define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
+static uint32_t rotate_left(uint32_t x, int n)
+{
+    return (x << n) | (x >> (32 - n));
+}
 
 /* FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4.
 Rotation is separate from addition to prevent recomputation.
  */
 #define FF(a, b, c, d, x, s, ac)                        \
     {                                                   \
-        (a) += F((b), (c), (d)) + (x) + (uint32_t)(ac); \
-        (a) = ROTATE_LEFT((a), (s));                    \
+        (a) += f((b), (c), (d)) + (x) + (uint32_t)(ac); \
+        (a) = rotate_left((a), (s));                    \
         (a) += (b);                                     \
     }
 #define GG(a, b, c, d, x, s, ac)                        \
     {                                                   \
-        (a) += G((b), (c), (d)) + (x) + (uint32_t)(ac); \
-        (a) = ROTATE_LEFT((a), (s));                    \
+        (a) += g((b), (c), (d)) + (x) + (uint32_t)(ac); \
+        (a) = rotate_left((a), (s));                    \
         (a) += (b);                                     \
     }
 #define HH(a, b, c, d, x, s, ac)                        \
     {                                                   \
-        (a) += H((b), (c), (d)) + (x) + (uint32_t)(ac); \
-        (a) = ROTATE_LEFT((a), (s));                    \
+        (a) += h((b), (c), (d)) + (x) + (uint32_t)(ac); \
+        (a) = rotate_left((a), (s));                    \
         (a) += (b);                                     \
     }
 #define II(a, b, c, d, x, s, ac)                        \
     {                                                   \
-        (a) += I((b), (c), (d)) + (x) + (uint32_t)(ac); \
-        (a) = ROTATE_LEFT((a), (s));                    \
+        (a) += i((b), (c), (d)) + (x) + (uint32_t)(ac); \
+        (a) = rotate_left((a), (s));                    \
         (a) += (b);                                     \
     }
 
