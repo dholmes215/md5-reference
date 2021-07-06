@@ -22,7 +22,8 @@ without express or implied warranty of any kind.
 These notices must be retained in any copies of any part of this
 documentation and/or software.
  */
-
+#ifndef MD5_H
+#define MD5_H
 #include <stdint.h>
 
 /* MD5 context. */
@@ -35,3 +36,5 @@ typedef struct {
 void MD5Init(MD5_CTX*);
 void MD5Update(MD5_CTX*, unsigned char*, unsigned int);
 void MD5Final(unsigned char[16], MD5_CTX*);
+
+#endif  // MD5_H
