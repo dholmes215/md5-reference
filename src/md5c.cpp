@@ -48,9 +48,9 @@ documentation and/or software.
 #define S43 15
 #define S44 21
 
-static void MD5Transform(uint32_t[4], unsigned char[64]);
-static void Encode(unsigned char*, uint32_t*, unsigned int);
-static void Decode(uint32_t*, unsigned char*, unsigned int);
+static void MD5Transform(uint32_t[4], const unsigned char[64]);
+static void Encode(uint8_t*, uint32_t*, uint32_t);
+static void Decode(uint32_t*, const uint8_t*, uint32_t);
 
 static unsigned char PADDING[64] = {
     0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -91,29 +91,29 @@ static uint32_t rotate_left(uint32_t x, int n)
 /* FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4.
 Rotation is separate from addition to prevent recomputation.
  */
-#define FF(a, b, c, d, x, s, ac)                        \
-    {                                                   \
-        (a) += f((b), (c), (d)) + (x) + (uint32_t)(ac); \
-        (a) = rotate_left((a), (s));                    \
-        (a) += (b);                                     \
+#define FF(a, b, c, d, x, s, ac)                                   \
+    {                                                              \
+        (a) += f((b), (c), (d)) + (x) + static_cast<uint32_t>(ac); \
+        (a) = rotate_left((a), (s));                               \
+        (a) += (b);                                                \
     }
-#define GG(a, b, c, d, x, s, ac)                        \
-    {                                                   \
-        (a) += g((b), (c), (d)) + (x) + (uint32_t)(ac); \
-        (a) = rotate_left((a), (s));                    \
-        (a) += (b);                                     \
+#define GG(a, b, c, d, x, s, ac)                                   \
+    {                                                              \
+        (a) += g((b), (c), (d)) + (x) + static_cast<uint32_t>(ac); \
+        (a) = rotate_left((a), (s));                               \
+        (a) += (b);                                                \
     }
-#define HH(a, b, c, d, x, s, ac)                        \
-    {                                                   \
-        (a) += h((b), (c), (d)) + (x) + (uint32_t)(ac); \
-        (a) = rotate_left((a), (s));                    \
-        (a) += (b);                                     \
+#define HH(a, b, c, d, x, s, ac)                                   \
+    {                                                              \
+        (a) += h((b), (c), (d)) + (x) + static_cast<uint32_t>(ac); \
+        (a) = rotate_left((a), (s));                               \
+        (a) += (b);                                                \
     }
-#define II(a, b, c, d, x, s, ac)                        \
-    {                                                   \
-        (a) += i((b), (c), (d)) + (x) + (uint32_t)(ac); \
-        (a) = rotate_left((a), (s));                    \
-        (a) += (b);                                     \
+#define II(a, b, c, d, x, s, ac)                                   \
+    {                                                              \
+        (a) += i((b), (c), (d)) + (x) + static_cast<uint32_t>(ac); \
+        (a) = rotate_left((a), (s));                               \
+        (a) += (b);                                                \
     }
 
 /* MD5 initialization. Begins an MD5 operation, writing a new context.
@@ -135,28 +135,27 @@ void MD5Init(MD5_CTX* context)
 
   @param context  context
   @param input    input block
-  @param inputLen input block length
+  @param inputLen input block length in bytes
  */
-void MD5Update(MD5_CTX* context, unsigned char* input, unsigned int inputLen)
+void MD5Update(MD5_CTX* context, const uint8_t* input, uint32_t inputLen)
 {
-    unsigned int i, index, partLen;
+    unsigned int i, partLen;
 
     /* Compute number of bytes mod 64 */
-    index = (unsigned int)((context->count[0] >> 3) & 0x3F);
+    unsigned int index = (context->count[0] >> 3) & 0x3F;
 
     /* Update number of bits */
-    if ((context->count[0] += ((uint32_t)inputLen << 3))
-
-        < ((uint32_t)inputLen << 3))
+    if ((context->count[0] += (inputLen << 3)) < (inputLen << 3)) {
         context->count[1]++;
-    context->count[1] += ((uint32_t)inputLen >> 29);
+    }
+    context->count[1] += (inputLen >> 29);
 
     partLen = 64 - index;
 
     /* Transform as many times as possible.
      */
     if (inputLen >= partLen) {
-        memcpy((uint8_t*)&context->buffer[index], (uint8_t*)input, partLen);
+        memcpy(&context->buffer[index], input, partLen);
         MD5Transform(context->state, context->buffer);
 
         for (i = partLen; i + 63 < inputLen; i += 64)
@@ -168,8 +167,7 @@ void MD5Update(MD5_CTX* context, unsigned char* input, unsigned int inputLen)
         i = 0;
 
     /* Buffer remaining input */
-    memcpy((uint8_t*)&context->buffer[index], (uint8_t*)&input[i],
-           inputLen - i);
+    memcpy(&context->buffer[index], &input[i], inputLen - i);
 }
 
 /* MD5 finalization. Ends an MD5 message-digest operation, writing the
@@ -178,17 +176,18 @@ void MD5Update(MD5_CTX* context, unsigned char* input, unsigned int inputLen)
   @param digest   The MD5 digest output (must be 16 bytes)
   @param context  The context.
  */
-void MD5Final(unsigned char* digest, MD5_CTX* context)
+void MD5Final(uint8_t* digest, MD5_CTX* context)
 {
     unsigned char bits[8];
-    unsigned int index, padLen;
+    uint32_t index;
+    unsigned int padLen;
 
     /* Save number of bits */
     Encode(bits, context->count, 8);
 
     /* Pad out to 56 mod 64.
      */
-    index = (unsigned int)((context->count[0] >> 3) & 0x3f);
+    index = (context->count[0] >> 3) & 0x3f;
     padLen = (index < 56) ? (56 - index) : (120 - index);
     MD5Update(context, PADDING, padLen);
 
@@ -198,9 +197,8 @@ void MD5Final(unsigned char* digest, MD5_CTX* context)
     /* Store state in digest */
     Encode(digest, context->state, 16);
 
-    /* Zeroize sensitive information.
-     */
-    memset((uint8_t*)context, 0, sizeof(*context));
+    /* Zeroize sensitive information. */
+    memset(context, 0, sizeof(*context));
 }
 
 /* MD5 basic transformation. Transforms state based on block.
@@ -208,7 +206,7 @@ void MD5Final(unsigned char* digest, MD5_CTX* context)
   @param state The current state (must be four words)
   @param block  The block being processed (must be 64 bytes)
  */
-static void MD5Transform(uint32_t* state, unsigned char* block)
+static void MD5Transform(uint32_t* state, const unsigned char* block)
 {
     uint32_t a = state[0], b = state[1], c = state[2], d = state[3], x[16];
 
@@ -244,7 +242,6 @@ static void MD5Transform(uint32_t* state, unsigned char* block)
     GG(a, b, c, d, x[9], S21, 0x21e1cde6);  /* 25 */
     GG(d, a, b, c, x[14], S22, 0xc33707d6); /* 26 */
     GG(c, d, a, b, x[3], S23, 0xf4d50d87);  /* 27 */
-
     GG(b, c, d, a, x[8], S24, 0x455a14ed);  /* 28 */
     GG(a, b, c, d, x[13], S21, 0xa9e3e905); /* 29 */
     GG(d, a, b, c, x[2], S22, 0xfcefa3f8);  /* 30 */
@@ -294,33 +291,34 @@ static void MD5Transform(uint32_t* state, unsigned char* block)
 
     /* Zeroize sensitive information.
      */
-    memset((uint8_t*)x, 0, sizeof(x));
+    memset(x, 0, sizeof(x));
 }
 
 /* Encodes input (uint32_t) into output (unsigned char). Assumes len is
   a multiple of 4.
  */
-static void Encode(unsigned char* output, uint32_t* input, unsigned int len)
+static void Encode(uint8_t* output, uint32_t* input, uint32_t len)
 {
     unsigned int i, j;
 
     for (i = 0, j = 0; j < len; i++, j += 4) {
-        output[j] = (unsigned char)(input[i] & 0xff);
-        output[j + 1] = (unsigned char)((input[i] >> 8) & 0xff);
-        output[j + 2] = (unsigned char)((input[i] >> 16) & 0xff);
-        output[j + 3] = (unsigned char)((input[i] >> 24) & 0xff);
+        output[j] = input[i] & 0xff;
+        output[j + 1] = (input[i] >> 8) & 0xff;
+        output[j + 2] = (input[i] >> 16) & 0xff;
+        output[j + 3] = (input[i] >> 24) & 0xff;
     }
 }
 
 /* Decodes input (unsigned char) into output (uint32_t). Assumes len is
   a multiple of 4.
  */
-static void Decode(uint32_t* output, unsigned char* input, unsigned int len)
+static void Decode(uint32_t* output, const uint8_t* input, uint32_t len)
 {
     unsigned int i, j;
 
     for (i = 0, j = 0; j < len; i++, j += 4)
-        output[i] = ((uint32_t)input[j]) | (((uint32_t)input[j + 1]) << 8) |
-                    (((uint32_t)input[j + 2]) << 16) |
-                    (((uint32_t)input[j + 3]) << 24);
+        output[i] = static_cast<uint32_t>(input[j]) |
+                    (static_cast<uint32_t>(input[j + 1]) << 8) |
+                    (static_cast<uint32_t>(input[j + 2]) << 16) |
+                    (static_cast<uint32_t>(input[j + 3]) << 24);
 }

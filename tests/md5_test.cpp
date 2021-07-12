@@ -1,7 +1,5 @@
 
-extern "C" {
 #include "md5.h"
-}
 
 #include <catch2/catch.hpp>
 

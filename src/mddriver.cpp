@@ -13,17 +13,20 @@ These notices must be retained in any copies of any part of this
 documentation and/or software.
  */
 
+#include "md5.h"
+
+#include <gsl/gsl>
+
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#include "md5.h"
 
 /* Length of test block, number of test blocks.
  */
 #define TEST_BLOCK_LEN 100000
 #define TEST_BLOCK_COUNT 100000
 
-static void MDString(char*);
+static void MDString(const char*);
 static void MDTimeTrial(void);
 static void MDTestSuite(void);
 static void MDFile(char*);
@@ -61,14 +64,14 @@ int main(int argc, char** argv)
 
 /* Digests a string and prints the result.
  */
-static void MDString(char* string)
+static void MDString(const char* string)
 {
     MD5_CTX context;
     unsigned char digest[16];
-    unsigned int len = (unsigned int)strlen(string);
+    unsigned int len = gsl::narrow<unsigned int>(strlen(string));
 
     MD5Init(&context);
-    MD5Update(&context, (unsigned char*)string, len);
+    MD5Update(&context, reinterpret_cast<const uint8_t*>(string), len);
     MD5Final(digest, &context);
 
     printf("MD5 (\"%s\") = ", string);
@@ -76,9 +79,7 @@ static void MDString(char* string)
     printf("\n");
 }
 
-/* Measures the time to digest TEST_BLOCK_COUNT TEST_BLOCK_LEN-byte
-  blocks.
- */
+/* Measures the time to digest TEST_BLOCK_COUNT TEST_BLOCK_LEN-byte blocks. */
 static void MDTimeTrial()
 {
     MD5_CTX context;
@@ -90,7 +91,7 @@ static void MDTimeTrial()
 
     /* Initialize block */
     for (i = 0; i < TEST_BLOCK_LEN; i++)
-        block[i] = (unsigned char)(i & 0xff);
+        block[i] = i & 0xff;
 
     /* Start timer */
     time(&startTime);
@@ -107,10 +108,11 @@ static void MDTimeTrial()
     printf(" done\n");
     printf("Digest = ");
     MDPrint(digest);
-    printf("\nTime = %ld seconds\n", (long)(endTime - startTime));
+    printf("\nTime = %ld seconds\n", static_cast<long>(endTime - startTime));
     printf("Speed = %ld bytes/second\n",
-           (long)TEST_BLOCK_LEN *
-               ((long)TEST_BLOCK_COUNT / (long)(endTime - startTime)));
+           static_cast<long>(TEST_BLOCK_LEN) *
+               (static_cast<long>(TEST_BLOCK_COUNT) /
+                static_cast<long>(endTime - startTime)));
 }
 
 /* Digests a reference suite of strings and prints the results.
@@ -150,7 +152,8 @@ static void MDFile(char* filename)
 
     else {
         MD5Init(&context);
-        while ((len = (unsigned int)fread(buffer, 1, 1024, file)) != 0)
+        while ((len = static_cast<unsigned int>(
+                    fread(buffer, 1, 1024, file))) != 0)
             MD5Update(&context, buffer, len);
         MD5Final(digest, &context);
 
@@ -171,7 +174,7 @@ static void MDFilter()
     unsigned char buffer[16], digest[16];
 
     MD5Init(&context);
-    while ((len = (unsigned int)fread(buffer, 1, 16, stdin)) != 0)
+    while ((len = static_cast<unsigned int>(fread(buffer, 1, 16, stdin))) != 0)
         MD5Update(&context, buffer, len);
     MD5Final(digest, &context);
 
