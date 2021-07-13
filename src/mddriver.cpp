@@ -15,16 +15,18 @@ documentation and/or software.
 
 #include "md5.h"
 
+#include <fmt/format.h>
+
 #include <gsl/gsl>
 
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include <chrono>
+#include <cstdio>
+#include <cstring>
 
 /* Length of test block, number of test blocks.
  */
-#define TEST_BLOCK_LEN 100000
-#define TEST_BLOCK_COUNT 100000
+constexpr auto test_block_len{100000};
+constexpr auto test_block_count{100000};
 
 static void MDString(const char*);
 static void MDTimeTrial(void);
@@ -82,37 +84,42 @@ static void MDString(const char* string)
 /* Measures the time to digest TEST_BLOCK_COUNT TEST_BLOCK_LEN-byte blocks. */
 static void MDTimeTrial()
 {
+    using std::chrono::duration;
+    using std::chrono::duration_cast;
+    using std::chrono::high_resolution_clock;
+    using std::chrono::milliseconds;
+
     MD5_CTX context;
-    time_t endTime, startTime;
-    unsigned char block[TEST_BLOCK_LEN], digest[16];
+    unsigned char block[test_block_len], digest[16];
     unsigned int i;
-    printf("MD5 time trial. Digesting %d %d-byte blocks ...", TEST_BLOCK_LEN,
-           TEST_BLOCK_COUNT);
+    printf("MD5 time trial. Digesting %d %d-byte blocks ...", test_block_len,
+           test_block_count);
 
     /* Initialize block */
-    for (i = 0; i < TEST_BLOCK_LEN; i++)
+    for (i = 0; i < test_block_len; i++)
         block[i] = i & 0xff;
 
     /* Start timer */
-    time(&startTime);
+    auto startTime = high_resolution_clock::now();
 
     /* Digest blocks */
     MD5Init(&context);
-    for (i = 0; i < TEST_BLOCK_COUNT; i++)
-        MD5Update(&context, block, TEST_BLOCK_LEN);
+    for (i = 0; i < test_block_count; i++)
+        MD5Update(&context, block, test_block_len);
     MD5Final(digest, &context);
 
     /* Stop timer */
-    time(&endTime);
+    auto endTime = high_resolution_clock::now();
+    milliseconds elapsed = duration_cast<milliseconds>(endTime - startTime);
 
     printf(" done\n");
     printf("Digest = ");
     MDPrint(digest);
-    printf("\nTime = %ld seconds\n", static_cast<long>(endTime - startTime));
-    printf("Speed = %ld bytes/second\n",
-           static_cast<long>(TEST_BLOCK_LEN) *
-               (static_cast<long>(TEST_BLOCK_COUNT) /
-                static_cast<long>(endTime - startTime)));
+    printf("\nTime = %ld ms\n", elapsed.count());
+    fmt::print("Speed = {} bytes/ms\n",
+               static_cast<double>(test_block_len) *
+                   (static_cast<double>(test_block_count) /
+                    static_cast<double>(elapsed.count())));
 }
 
 /* Digests a reference suite of strings and prints the results.

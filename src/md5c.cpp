@@ -25,34 +25,36 @@ documentation and/or software.
 
 #include "md5.h"
 
-#include "stdint.h"
-#include "string.h"
+#include <stdint.h>
+#include <algorithm>
+#include <bit>
+#include <cstring>
 
-/* Constants for MD5Transform routine.
- */
+namespace {
 
-#define S11 7
-#define S12 12
-#define S13 17
-#define S14 22
-#define S21 5
-#define S22 9
-#define S23 14
-#define S24 20
-#define S31 4
-#define S32 11
-#define S33 16
-#define S34 23
-#define S41 6
-#define S42 10
-#define S43 15
-#define S44 21
+// Constants for MD5Transform routine.
+constexpr auto S11{7};
+constexpr auto S12{12};
+constexpr auto S13{17};
+constexpr auto S14{22};
+constexpr auto S21{5};
+constexpr auto S22{9};
+constexpr auto S23{14};
+constexpr auto S24{20};
+constexpr auto S31{4};
+constexpr auto S32{11};
+constexpr auto S33{16};
+constexpr auto S34{23};
+constexpr auto S41{6};
+constexpr auto S42{10};
+constexpr auto S43{15};
+constexpr auto S44{21};
 
-static void MD5Transform(uint32_t[4], const unsigned char[64]);
-static void Encode(uint8_t*, uint32_t*, uint32_t);
-static void Decode(uint32_t*, const uint8_t*, uint32_t);
+void MD5Transform(uint32_t[4], const unsigned char[64]);
+void encode(uint8_t* output, const uint32_t* input, uint32_t len);
+auto decode(const uint8_t* input) -> std::array<uint32_t, 16>;
 
-static unsigned char PADDING[64] = {
+constexpr std::array<uint8_t, 64> padding{
     0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -60,73 +62,69 @@ static unsigned char PADDING[64] = {
 /* F, G, H and I are basic MD5 functions.
  */
 
-static uint32_t f(uint32_t x, uint32_t y, uint32_t z)
+constexpr uint32_t f(uint32_t x, uint32_t y, uint32_t z) noexcept
 {
     return (x & y) | (~x & z);
 }
 
-static uint32_t g(uint32_t x, uint32_t y, uint32_t z)
+constexpr uint32_t g(uint32_t x, uint32_t y, uint32_t z) noexcept
 {
     return (x & z) | (y & ~z);
 }
 
-static uint32_t h(uint32_t x, uint32_t y, uint32_t z)
+constexpr uint32_t h(uint32_t x, uint32_t y, uint32_t z) noexcept
 {
     return x ^ y ^ z;
 }
 
-static uint32_t i(uint32_t x, uint32_t y, uint32_t z)
+constexpr uint32_t i(uint32_t x, uint32_t y, uint32_t z) noexcept
 {
     return y ^ (x | ~z);
 }
 
-/* Rotate x left n bits.
-    TODO: use C++20's std::rotl
- */
-static uint32_t rotate_left(uint32_t x, int n)
-{
-    return (x << n) | (x >> (32 - n));
-}
+}  // namespace
 
 /* FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4.
 Rotation is separate from addition to prevent recomputation.
  */
-#define FF(a, b, c, d, x, s, ac)                                   \
-    {                                                              \
-        (a) += f((b), (c), (d)) + (x) + static_cast<uint32_t>(ac); \
-        (a) = rotate_left((a), (s));                               \
-        (a) += (b);                                                \
+// [[gnu::always_inline]] void FF(auto& a, auto b, auto c, auto d, auto x, auto
+// s, uint32_t ac, auto func)
+// {
+//     a += func(b, c, d) + x + ac;
+//     a = std::rotl(a, s);
+//     a += b;
+// }
+#define FF(a, b, c, d, x, s, ac)                      \
+    {                                                 \
+        (a) += f((b), (c), (d)) + (x) + uint32_t{ac}; \
+        (a) = std::rotl((a), (s));                    \
+        (a) += (b);                                   \
     }
-#define GG(a, b, c, d, x, s, ac)                                   \
-    {                                                              \
-        (a) += g((b), (c), (d)) + (x) + static_cast<uint32_t>(ac); \
-        (a) = rotate_left((a), (s));                               \
-        (a) += (b);                                                \
+#define GG(a, b, c, d, x, s, ac)                      \
+    {                                                 \
+        (a) += g((b), (c), (d)) + (x) + uint32_t{ac}; \
+        (a) = std::rotl((a), (s));                    \
+        (a) += (b);                                   \
     }
-#define HH(a, b, c, d, x, s, ac)                                   \
-    {                                                              \
-        (a) += h((b), (c), (d)) + (x) + static_cast<uint32_t>(ac); \
-        (a) = rotate_left((a), (s));                               \
-        (a) += (b);                                                \
+#define HH(a, b, c, d, x, s, ac)                      \
+    {                                                 \
+        (a) += h((b), (c), (d)) + (x) + uint32_t{ac}; \
+        (a) = std::rotl((a), (s));                    \
+        (a) += (b);                                   \
     }
-#define II(a, b, c, d, x, s, ac)                                   \
-    {                                                              \
-        (a) += i((b), (c), (d)) + (x) + static_cast<uint32_t>(ac); \
-        (a) = rotate_left((a), (s));                               \
-        (a) += (b);                                                \
+#define II(a, b, c, d, x, s, ac)                      \
+    {                                                 \
+        (a) += i((b), (c), (d)) + (x) + uint32_t{ac}; \
+        (a) = std::rotl((a), (s));                    \
+        (a) += (b);                                   \
     }
 
 /* MD5 initialization. Begins an MD5 operation, writing a new context.
  */
 void MD5Init(MD5_CTX* context)
 {
-    context->count[0] = context->count[1] = 0;
-    /* Load magic initialization constants.
-     */
-    context->state[0] = 0x67452301;
-    context->state[1] = 0xefcdab89;
-    context->state[2] = 0x98badcfe;
-    context->state[3] = 0x10325476;
+    md5::context c{};
+    std::memcpy(context, &c, sizeof(MD5_CTX));
 }
 
 /* MD5 block update operation. Continues an MD5 message-digest
@@ -139,23 +137,23 @@ void MD5Init(MD5_CTX* context)
  */
 void MD5Update(MD5_CTX* context, const uint8_t* input, uint32_t inputLen)
 {
-    unsigned int i, partLen;
-
     /* Compute number of bytes mod 64 */
     unsigned int index = (context->count[0] >> 3) & 0x3F;
 
     /* Update number of bits */
-    if ((context->count[0] += (inputLen << 3)) < (inputLen << 3)) {
+    if ((context->count[0] += (inputLen * 8)) < (inputLen * 8)) {
         context->count[1]++;
     }
     context->count[1] += (inputLen >> 29);
 
-    partLen = 64 - index;
+    unsigned int partLen = 64 - index;
 
     /* Transform as many times as possible.
      */
+    unsigned int i;
     if (inputLen >= partLen) {
-        memcpy(&context->buffer[index], input, partLen);
+        const auto output_begin = context->buffer + index;
+        std::copy(input, input + partLen, output_begin);
         MD5Transform(context->state, context->buffer);
 
         for (i = partLen; i + 63 < inputLen; i += 64)
@@ -163,11 +161,15 @@ void MD5Update(MD5_CTX* context, const uint8_t* input, uint32_t inputLen)
 
         index = 0;
     }
-    else
+    else {
         i = 0;
+    }
 
     /* Buffer remaining input */
-    memcpy(&context->buffer[index], &input[i], inputLen - i);
+    const auto input_begin = input + i;
+    const auto input_end = input_begin + inputLen - i;
+    const auto output_begin = context->buffer + index;
+    std::copy(input_begin, input_end, output_begin);
 }
 
 /* MD5 finalization. Ends an MD5 message-digest operation, writing the
@@ -183,34 +185,38 @@ void MD5Final(uint8_t* digest, MD5_CTX* context)
     unsigned int padLen;
 
     /* Save number of bits */
-    Encode(bits, context->count, 8);
+    encode(bits, context->count, 8);
 
     /* Pad out to 56 mod 64.
      */
     index = (context->count[0] >> 3) & 0x3f;
     padLen = (index < 56) ? (56 - index) : (120 - index);
-    MD5Update(context, PADDING, padLen);
+    MD5Update(context, padding.data(), padLen);
 
     /* Append length (before padding) */
     MD5Update(context, bits, 8);
 
     /* Store state in digest */
-    Encode(digest, context->state, 16);
+    encode(digest, context->state, 16);
 
     /* Zeroize sensitive information. */
     memset(context, 0, sizeof(*context));
 }
+
+namespace {
 
 /* MD5 basic transformation. Transforms state based on block.
 
   @param state The current state (must be four words)
   @param block  The block being processed (must be 64 bytes)
  */
-static void MD5Transform(uint32_t* state, const unsigned char* block)
+void MD5Transform(uint32_t* state, const unsigned char* block)
 {
-    uint32_t a = state[0], b = state[1], c = state[2], d = state[3], x[16];
-
-    Decode(x, block, 64);
+    uint32_t a{state[0]};
+    uint32_t b{state[1]};
+    uint32_t c{state[2]};
+    uint32_t d{state[3]};
+    const std::array<uint32_t, 16> x{decode(block)};
 
     /* Round 1 */
     FF(a, b, c, d, x[0], S11, 0xd76aa478);  /* 1 */
@@ -289,36 +295,66 @@ static void MD5Transform(uint32_t* state, const unsigned char* block)
     state[2] += c;
     state[3] += d;
 
-    /* Zeroize sensitive information.
-     */
-    memset(x, 0, sizeof(x));
+    // /* Zeroize sensitive information.
+    //  */
+    // memset(x, 0, sizeof(x));
 }
 
-/* Encodes input (uint32_t) into output (unsigned char). Assumes len is
-  a multiple of 4.
- */
-static void Encode(uint8_t* output, uint32_t* input, uint32_t len)
+void encode_word(uint8_t* output, const uint32_t input)
 {
-    unsigned int i, j;
+    output[0] = static_cast<uint8_t>((input >> 0) & 0xff);
+    output[1] = static_cast<uint8_t>((input >> 8) & 0xff);
+    output[2] = static_cast<uint8_t>((input >> 16) & 0xff);
+    output[3] = static_cast<uint8_t>((input >> 24) & 0xff);
+}
 
-    for (i = 0, j = 0; j < len; i++, j += 4) {
-        output[j] = input[i] & 0xff;
-        output[j + 1] = (input[i] >> 8) & 0xff;
-        output[j + 2] = (input[i] >> 16) & 0xff;
-        output[j + 3] = (input[i] >> 24) & 0xff;
+// Encodes input (uint32_t) into output (unsigned char). Assumes len is a
+// multiple of 4.
+void encode(uint8_t* output, const uint32_t* input, uint32_t len)
+{
+    for (size_t i{0}; i < len / 4; i++) {
+        const auto j{i * 4};
+        encode_word(output + j, input[i]);
     }
 }
 
-/* Decodes input (unsigned char) into output (uint32_t). Assumes len is
-  a multiple of 4.
- */
-static void Decode(uint32_t* output, const uint8_t* input, uint32_t len)
+// Endian-independent decode of 4 bytes into a uint32_t.
+auto decode_word(const uint8_t* input) -> uint32_t
 {
-    unsigned int i, j;
-
-    for (i = 0, j = 0; j < len; i++, j += 4)
-        output[i] = static_cast<uint32_t>(input[j]) |
-                    (static_cast<uint32_t>(input[j + 1]) << 8) |
-                    (static_cast<uint32_t>(input[j + 2]) << 16) |
-                    (static_cast<uint32_t>(input[j + 3]) << 24);
+    return (static_cast<uint32_t>(input[0]) << 0) |
+           (static_cast<uint32_t>(input[1]) << 8) |
+           (static_cast<uint32_t>(input[2]) << 16) |
+           (static_cast<uint32_t>(input[3]) << 24);
 }
+
+// Decodes 64-byte input (unsigned char) into output (uint32_t).
+auto decode(const uint8_t* input) -> std::array<uint32_t, 16>
+{
+    std::array<uint32_t, 16> output;
+    for (size_t i{0}; i < output.size(); i++) {
+        const auto j{i * 4};
+        output[i] = decode_word(input + j);
+    }
+    return output;
+}
+
+}  // namespace
+
+namespace md5 {
+
+context::context() noexcept
+    : state{0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476}, count{}, buffer{}
+{
+}
+
+// void update(context& context, const uint8_t* input, uint32_t inputLen)
+// {
+
+// }
+
+// auto final(context& context) -> std::array<uint8_t, 16>
+// {
+
+// }
+
+}  // namespace md5

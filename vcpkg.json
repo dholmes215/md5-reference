@@ -4,6 +4,7 @@
     "dependencies": [
       "boost-algorithm",
       "catch2",
-      "ms-gsl"
+      "ms-gsl",
+      "fmt"
     ]
   }

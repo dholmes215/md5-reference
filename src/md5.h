@@ -46,4 +46,27 @@ void MD5Final(uint8_t[16], MD5_CTX*);
 }
 #endif
 
+// The C++-only bits
+#ifdef __cplusplus
+#include <array>
+
+namespace md5 {
+
+struct context {
+    std::array<uint32_t, 4> state;   // state (ABCD)
+    std::array<uint32_t, 2> count;   // number of bits, modulo 2^64 (lsb first)
+    std::array<uint8_t, 64> buffer;  // input buffer
+
+    context() noexcept;  // Initializes state and count as per MD5 RFC
+};
+
+static_assert(sizeof(context) == sizeof(MD5_CTX),
+              "Sizes of C and C++ struct versions are different");
+
+void update(context& context, const uint8_t* input, uint32_t inputLen);
+auto final(context& context) -> std::array<uint8_t, 16>;
+
+}  // namespace md5
+#endif
+
 #endif  // MD5_H
