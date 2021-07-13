@@ -76,9 +76,9 @@ static void MDString(const char* string)
     MD5Update(&context, reinterpret_cast<const uint8_t*>(string), len);
     MD5Final(digest, &context);
 
-    printf("MD5 (\"%s\") = ", string);
+    fmt::print("MD5 (\"{}\") = ", string);
     MDPrint(digest);
-    printf("\n");
+    fmt::print("\n");
 }
 
 /* Measures the time to digest TEST_BLOCK_COUNT TEST_BLOCK_LEN-byte blocks. */
@@ -92,8 +92,8 @@ static void MDTimeTrial()
     MD5_CTX context;
     unsigned char block[test_block_len], digest[16];
     unsigned int i;
-    printf("MD5 time trial. Digesting %d %d-byte blocks ...", test_block_len,
-           test_block_count);
+    fmt::print("MD5 time trial. Digesting {} {}-byte blocks ...",
+               test_block_len, test_block_count);
 
     /* Initialize block */
     for (i = 0; i < test_block_len; i++)
@@ -112,10 +112,10 @@ static void MDTimeTrial()
     auto endTime = high_resolution_clock::now();
     milliseconds elapsed = duration_cast<milliseconds>(endTime - startTime);
 
-    printf(" done\n");
-    printf("Digest = ");
+    fmt::print(" done\n");
+    fmt::print("Digest = ");
     MDPrint(digest);
-    printf("\nTime = %ld ms\n", elapsed.count());
+    fmt::print("\nTime = {} ms\n", elapsed.count());
     fmt::print("Speed = {} bytes/ms\n",
                static_cast<double>(test_block_len) *
                    (static_cast<double>(test_block_count) /
@@ -126,7 +126,7 @@ static void MDTimeTrial()
  */
 static void MDTestSuite()
 {
-    printf("MD5 test suite:\n");
+    fmt::print("MD5 test suite:\n");
 
     MDString("");
     MDString("a");
@@ -155,7 +155,7 @@ static void MDFile(char* filename)
 #endif
 
     if ((file = fopen(filename, "rb")) == NULL)
-        printf("%s can't be opened\n", filename);
+        fmt::print("{} can't be opened\n", filename);
 
     else {
         MD5Init(&context);
@@ -166,9 +166,9 @@ static void MDFile(char* filename)
 
         fclose(file);
 
-        printf("MD5 (%s) = ", filename);
+        fmt::print("MD5 ({}) = ", filename);
         MDPrint(digest);
-        printf("\n");
+        fmt::print("\n");
     }
 }
 
@@ -186,7 +186,7 @@ static void MDFilter()
     MD5Final(digest, &context);
 
     MDPrint(digest);
-    printf("\n");
+    fmt::print("\n");
 }
 
 /* Prints a message digest in hexadecimal.
@@ -197,6 +197,7 @@ static void MDPrint(unsigned char* digest)
 {
     unsigned int i;
 
-    for (i = 0; i < 16; i++)
-        printf("%02x", digest[i]);
+    for (i = 0; i < 16; i++) {
+        fmt::print("{:#02x}", digest[i]);
+    }
 }
